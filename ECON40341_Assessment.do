@@ -12,11 +12,11 @@ clear all
 set more off
 
 ****load, preparing and cleaning datasets
-import excel "C:\Users\toste\SynologyDrive\Studium\Master\Nottingham\Quantitative Data in Economic Analysis\OGHIST_2026_10_08.xlsx", sheet("Country Analytical History") firstrow clear //Using Country Analytical History as Income-Classification
+import excel "C:\Users\toste\SynologyDrive\Studium\Master\Nottingham\Quantitative-Data-in-Economic-Analysis\OGHIST_2026_10_08.xlsx", sheet("Country Analytical History") firstrow clear //Using Country Analytical History as Income-Classification
 keep CountryCode J 		//J is the Income Classification for the starting year 1994
 save "classification_1994.dta", replace
 
-import excel "C:\Users\toste\SynologyDrive\Studium\Master\Nottingham\Quantitative Data in Economic Analysis\master_data.xlsx", sheet("Data") firstrow clear
+import excel "C:\Users\toste\SynologyDrive\Studium\Master\Nottingham\Quantitative-Data-in-Economic-Analysis\master_data.xlsx", sheet("Data") firstrow clear
 save "master_data.dta", replace //import master_dataset and merging datasets
 
 *preparing and cleaning the dataset
@@ -115,10 +115,10 @@ label define g3 1 "Low" 2 "Middle" 3 "High"
 label values group3 g3
 label variable group3 "Income group 1995 (L / LM+UM / H)"
 
-
 ****Variable construction
 xtdescribe if sample == 1
 summarize GDPgrowth Trade govexpenditure Inflation if sample == 1, detail
 
 gen logInflation = log(1 + Inflation/100) //steady inflation rate
 label variable logInflation "ln(1 + Inflation/100), Inflation in % p.a."
+summarize logInflation if sample == 1, detail
