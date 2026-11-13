@@ -122,3 +122,46 @@ summarize GDPgrowth Trade govexpenditure Inflation if sample == 1, detail
 gen logInflation = log(1 + Inflation/100) //steady inflation rate
 label variable logInflation "ln(1 + Inflation/100), Inflation in % p.a."
 summarize logInflation if sample == 1, detail
+
+
+
+****diagnostic plots, tables for chossing the best working regression
+
+xtserial GDPgrowth Trade govexpenditure logInflation if sample == 1 // Wooldridge (2002) test
+
+xtreg GDPgrowth Trade govexpenditure logInflation if sample == 1, fe //Pooled OLS vs. Fixed Effects
+estimates store fe_test
+
+xtreg GDPgrowth govexpenditure Trade logInflation if sample == 1, re //Random Effects
+estimates store re_test
+hausman fe_test re_test
+//Table createt in latex
+
+****regression models with clustered error therms
+xtreg GDPgrowth Trade govexpenditure logInflation if sample == 1,fe vce(cluster CountryID) // Fixed Effects - DEIN HAUPTMODELL (mit geclusterten Standardfehlern)
+eststo FE
+
+reg GDPgrowth Trade govexpenditure logInflation if sample == 1, vce(cluster CountryID) //Pooled OLS
+eststo OLS
+
+xtreg GDPgrowth Trade govexpenditure logInflation if sample == 1,re vce(cluster CountryID) //Random Effects
+eststo RE
+
+****robustness checks
+eststo clear
+
+**Sample Selection: Balanced ( T=20 ) vs. Unbalanced Full Sample
+xtreg GDPgrowth Trade govexpenditure logInflation, fe vce(cluster CountryID)
+eststo rob_full
+
+**Justification for time period
+xtreg GDPgrowth Trade govexpenditure logInflation i.Time if sample == 1, fe vce(cluster CountryID)
+eststo rob_yearfe
+
+**Reverse Causality): Lagged Trade Openness
+xtreg GDPgrowth L.Trade govexpenditure logInflation if sample == 1, fe vce(cluster CountryID)
+eststo rob_lag
+
+esttab rob_full rob_yearfe rob_lag, b(3) se(3) star(* 0.10 ** 0.05 *** 0.01) ///
+    keep(Trade L.Trade govexpenditure logInflation _cons) stats(N N_g r2_w) ///
+    mtitle("Full Sample" "Two-Way FE" "Lagged Trade")
