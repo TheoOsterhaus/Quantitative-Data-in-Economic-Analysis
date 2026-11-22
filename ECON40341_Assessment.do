@@ -30,12 +30,16 @@ encode CountryCode, generate(CountryID)
 encode Income, generate(IncomeNum)
 xtset CountryID Time 	//creating panel data
 
+*Declare panel structure (Full dataset: N = 217 countries, T = 65 years)
+xtset CountryID Time
+xtdescribe
+
 *complete-case indicator for all four variables
 gen byte complete = !missing(GDPgrowth, Trade, govexpenditure, Inflation)
 bysort CountryCode: egen n_complete = total(complete)
 gsort -n_complete
 
-****diagnostic plots to create a menaingfull sample
+****diagnostic plots to create a menaingfull sample(Use AI to assist by creating the code for the plot)
 preserve
 keep CountryCode Time complete
 fillin CountryCode Time  //missing counts as incomplete
@@ -132,7 +136,7 @@ xtserial GDPgrowth Trade govexpenditure logInflation if sample == 1 // Wooldridg
 xtreg GDPgrowth Trade govexpenditure logInflation if sample == 1, fe //Pooled OLS vs. Fixed Effects
 estimates store fe_test
 
-xtreg GDPgrowth govexpenditure Trade logInflation if sample == 1, re //Random Effects
+xtreg GDPgrowth Trade govexpenditure logInflation if sample == 1, re //Random Effects
 estimates store re_test
 hausman fe_test re_test
 //Table createt in latex
